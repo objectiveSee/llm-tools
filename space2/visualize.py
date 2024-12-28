@@ -22,10 +22,13 @@ def visualize_packing(container, plotter=None):
     
     if plotter is None:
         plotter = pv.Plotter()
-        # Set trackball mode and camera controls
-        plotter.enable_trackball_style()
-        # Set initial camera orientation
-        plotter.camera.azimuth = 180  # Rotate initial view 180 degrees
+    # Set trackball mode and camera controls
+    plotter.enable_trackball_style()
+    # Set initial camera orientation
+    plotter.camera.azimuth = 180  # Rotate initial view 180 degrees
+    
+    # Add camera orientation widget for view reset
+    plotter.add_camera_orientation_widget()
     
     # Create container wireframe
     container_box = create_box(container.width, container.height, container.depth, (0, 0, 0))
