@@ -15,15 +15,21 @@ def create_box(width, height, depth, position):
 
 def visualize_packing(container, plotter=None):
     """Create 3D visualization of packed container"""
+    # Use default theme
+    pv.global_theme.background = 'white'
+    pv.global_theme.window_size = [1024, 768]
+    
     if plotter is None:
         plotter = pv.Plotter()
+        # Set trackball mode and camera controls
+        plotter.enable_trackball_style()
+        # Set initial camera orientation
+        plotter.camera.azimuth = 180  # Rotate initial view 180 degrees
     
     # Create container wireframe
     container_box = create_box(container.width, container.height, container.depth, (0, 0, 0))
-    # Add solid green container
-    plotter.add_mesh(container_box, color='green', opacity=0.3)
-    # Add wireframe for better visibility
-    plotter.add_mesh(container_box, style='wireframe', color='black', line_width=2)
+    # Add container with green color
+    plotter.add_mesh(container_box, color='green', opacity=0.2)
     
     # Color map for different bin types
     colors = {
@@ -88,8 +94,20 @@ def visualize_packing(container, plotter=None):
 
 def show_interactive_plot(container):
     """Show interactive 3D plot"""
-    plotter = visualize_packing(container)
-    plotter.show()
+    try:
+        # Create plotter with off-screen rendering
+        plotter = pv.Plotter(off_screen=True)
+        plotter = visualize_packing(container, plotter)
+        
+        # Save to file
+        plotter.screenshot('packing_visualization.png')
+        print("Visualization saved to 'packing_visualization.png'")
+        
+        # Try to show interactive plot
+        plotter = visualize_packing(container)  # New plotter for interactive display
+        plotter.show()
+    except Exception as e:
+        print(f"Error showing plot: {e}")
 
 if __name__ == '__main__':
     # Test visualization with sample data
