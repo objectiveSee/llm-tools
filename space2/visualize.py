@@ -24,9 +24,8 @@ def visualize_packing(container, plotter=None):
         plotter = pv.Plotter()
     # Set trackball mode and camera controls
     plotter.enable_trackball_style()
-    # Set initial camera orientation
-    plotter.view_isometric()  # Set initial isometric view
-    plotter.camera.azimuth = 0  # Set initial view angle
+    # Set initial camera orientation with specific position for better zoom
+    plotter.camera_position = [(300, 300, 300), (0, 0, 0), (0, 0, 1)]  # Position, focal point, up vector
     
     # Add camera orientation widget and reset camera button
     plotter.add_camera_orientation_widget()
@@ -34,8 +33,7 @@ def visualize_packing(container, plotter=None):
     
     # Add reset camera handlers for both lowercase and uppercase R
     def reset_view(plotter):
-        plotter.view_isometric()  # Reset to isometric view
-        plotter.camera.azimuth = 0  # Set view angle
+        plotter.camera_position = [(300, 300, 300), (0, 0, 0), (0, 0, 1)]  # Same as initial view
     
     plotter.add_key_event('r', lambda: reset_view(plotter))
     plotter.add_key_event('R', lambda: reset_view(plotter))
