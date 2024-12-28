@@ -1,6 +1,6 @@
-Type	Width	Height	Depth	Weight	Quantity
-Small	12	12	18	50	10
-Medium	18	18	24	100	10
-Large	24	24	36	150	2
-XL	36	36	48	200	1
-XXL	42	42	54	250	1
+Type	Width	Height	Depth	Weight	Quantity	Color
+Small	12	12	18	50	10	bisque
+Medium	18	18	24	100	10	tan
+Large	24	24	36	150	2	peru
+XL	36	36	48	200	1	sienna
+XXL	42	42	54	250	1	saddlebrown

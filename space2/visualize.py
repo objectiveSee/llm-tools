@@ -35,14 +35,26 @@ def visualize_packing(container, plotter=None):
     # Add container with green color
     plotter.add_mesh(container_box, color='green', opacity=0.2)
     
-    # Color map for different bin types
-    colors = {
-        'Small': 'tan',
-        'Medium': 'tan',
-        'Large': 'tan',
-        'XL': 'tan',
-        'XXL': 'tan'
-    }
+    # Read bin colors from Bins.tsv
+    colors = {}
+    try:
+        with open('Bins.tsv', 'r') as f:
+            lines = f.readlines()
+            header = lines[0].strip().split('\t')
+            color_index = header.index('Color') if 'Color' in header else -1
+            type_index = header.index('Type')
+            
+            for line in lines[1:]:  # Skip header
+                parts = line.strip().split('\t')
+                if len(parts) > type_index:
+                    bin_type = parts[type_index]
+                    # Use specified color if available and valid, otherwise default to black
+                    color = parts[color_index] if color_index >= 0 and len(parts) > color_index and parts[color_index].strip() else 'black'
+                    colors[bin_type] = color
+    except Exception as e:
+        print(f"Error reading colors from Bins.tsv: {e}")
+        # Default all colors to black if there's an error
+        colors = {bin_type: 'black' for bin_type in ['Small', 'Medium', 'Large', 'XL', 'XXL']}
     
     # Add each packed item
     for item in container.items:
@@ -58,7 +70,7 @@ def visualize_packing(container, plotter=None):
         )
         
         # Add to plot with slight transparency and edges visible
-        plotter.add_mesh(box, color=colors.get(bin_type, 'tan'), opacity=0.7, show_edges=True)
+        plotter.add_mesh(box, color=colors.get(bin_type, 'black'), opacity=0.7, show_edges=True)
     
     # Add unfitted items in a grid layout outside the container
     if hasattr(container, 'unfitted_items'):
@@ -89,7 +101,7 @@ def visualize_packing(container, plotter=None):
             )
             
             # Add to plot with different opacity to distinguish from fitted items
-            plotter.add_mesh(box, color=colors.get(bin_type, 'tan'), opacity=0.4, style='wireframe')
+            plotter.add_mesh(box, color=colors.get(bin_type, 'black'), opacity=0.4, style='wireframe')
     
     # Set camera position to show Z axis as up (to match actual visualization)
     plotter.camera_position = 'iso'
