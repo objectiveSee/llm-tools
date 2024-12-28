@@ -25,10 +25,20 @@ def visualize_packing(container, plotter=None):
     # Set trackball mode and camera controls
     plotter.enable_trackball_style()
     # Set initial camera orientation
-    plotter.camera.azimuth = 180  # Rotate initial view 180 degrees
+    plotter.view_isometric()  # Set initial isometric view
+    plotter.camera.azimuth = 0  # Set initial view angle
     
-    # Add camera orientation widget for view reset
+    # Add camera orientation widget and reset camera button
     plotter.add_camera_orientation_widget()
+    plotter.add_text('Press R to reset camera', position='upper_left')
+    
+    # Add reset camera handlers for both lowercase and uppercase R
+    def reset_view(plotter):
+        plotter.view_isometric()  # Reset to isometric view
+        plotter.camera.azimuth = 0  # Set view angle
+    
+    plotter.add_key_event('r', lambda: reset_view(plotter))
+    plotter.add_key_event('R', lambda: reset_view(plotter))
     
     # Create container wireframe
     container_box = create_box(container.width, container.height, container.depth, (0, 0, 0))
@@ -103,8 +113,6 @@ def visualize_packing(container, plotter=None):
             # Add to plot with different opacity to distinguish from fitted items
             plotter.add_mesh(box, color=colors.get(bin_type, 'black'), opacity=0.4, style='wireframe')
     
-    # Set camera position to show Z axis as up (to match actual visualization)
-    plotter.camera_position = 'iso'
     # No need to modify elevation since Z is already up in PyVista's default view
     plotter.show_grid()
     
