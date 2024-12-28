@@ -5,11 +5,11 @@ def create_box(width, height, depth, position):
     """Create a box mesh with given dimensions at the specified position"""
     # Create box using corner coordinates
     # Note: position is the front-bottom-left corner (x,y,z)
-    # Swap Y and Z since packing uses Y as up but visualization uses Z as up
+    # Create box with Z as up (matching our packing coordinates)
     box = pv.Box(bounds=(
         position[0], position[0] + width,           # x bounds
-        position[2], position[2] + depth,           # y bounds (was z)
-        position[1], position[1] + height           # z bounds (was y) - height goes up
+        position[1], position[1] + height,          # y bounds
+        position[2], position[2] + depth            # z bounds (up)
     ))
     
     return box

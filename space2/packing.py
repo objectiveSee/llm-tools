@@ -48,8 +48,8 @@ def pack_bins(container):
     )
     packer.add_bin(container_bin)
     
-    # Sort bins by height in descending order
-    bins.sort(key=lambda x: x.height, reverse=True)
+    # Sort bins by height (Z dimension) in descending order
+    bins.sort(key=lambda x: x.depth, reverse=True)
     
     # Add all bins to the packer
     for bin_item in bins:
@@ -86,8 +86,8 @@ def pack_bins(container):
         fitted_item.rotation_type = item.rotation_type
         fitted_items.append(fitted_item)
     
-    # Sort items by height position (bottom to top)
-    fitted_items.sort(key=lambda x: x.position[1])
+    # Sort items by Z position (bottom to top)
+    fitted_items.sort(key=lambda x: x.position[2])
     
     # Apply gravity to each item
     for i, item in enumerate(fitted_items):
@@ -96,25 +96,25 @@ def pack_bins(container):
         
         # Check all items below this one for collision
         for other in fitted_items[:i]:
-            # Check if items overlap in X-Z plane (horizontal plane)
+            # Check if items overlap in X-Y plane (horizontal plane)
             x_overlap = (
                 item.position[0] < other.position[0] + other.width and 
                 item.position[0] + item.width > other.position[0]
             )
-            z_overlap = (
-                item.position[2] < other.position[2] + other.depth and 
-                item.position[2] + item.depth > other.position[2]
+            y_overlap = (
+                item.position[1] < other.position[1] + other.height and 
+                item.position[1] + item.height > other.position[1]
             )
             
-            # If there's overlap in X-Z plane, this item must rest on top of the other
-            if x_overlap and z_overlap:
-                min_height = max(min_height, other.position[1] + other.height)
+            # If there's overlap in X-Y plane, this item must rest on top of the other
+            if x_overlap and y_overlap:
+                min_height = max(min_height, other.position[2] + other.depth)
         
         # Move item down to rest on highest surface below it
-        current_height = item.position[1]
+        current_height = item.position[2]
         if current_height > min_height:
             # Only move down if item is floating
-            item.position[1] = min_height
+            item.position[2] = min_height
     
     # Process unfitted items
     for item in container_result.unfitted_items:
