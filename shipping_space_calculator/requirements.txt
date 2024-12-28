@@ -1,0 +1,4 @@
+py3dbp
+matplotlib
+numpy
+pyvista>=0.42.0
