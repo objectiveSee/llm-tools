@@ -20,14 +20,17 @@ def visualize_packing(container, plotter=None):
     
     # Create container wireframe
     container_box = create_box(container.width, container.height, container.depth, (0, 0, 0))
+    # Add solid green container
+    plotter.add_mesh(container_box, color='green', opacity=0.3)
+    # Add wireframe for better visibility
     plotter.add_mesh(container_box, style='wireframe', color='black', line_width=2)
     
     # Color map for different bin types
     colors = {
-        'Small': 'red',
-        'Medium': 'blue',
-        'Large': 'green',
-        'XL': 'yellow'
+        'Small': 'tan',
+        'Medium': 'tan',
+        'Large': 'tan',
+        'XL': 'tan'
     }
     
     # Add each packed item
