@@ -22,17 +22,34 @@ def load_bins():
                 bins.append(bin_item)
     return bins
 
+def load_container():
+    """Load container information from Container.tsv"""
+    with open('Container.tsv', 'r') as file:
+        reader = csv.DictReader(file, delimiter='\t')
+        container_data = next(reader)  # Get first (and only) row
+        return container_data
+
 def pack_bins(container):
     """Pack bins into the container using py3dbp Packer for optimal fitting"""
-    # Load bins
+    # Load bins and container
     bins = load_bins()
+    container_data = load_container()
     
     # Create packer instance
     packer = Packer()
     
     # Create and add container from Container.tsv dimensions
-    container_bin = Bin("Container1", float(232), float(238), float(468), float(44000))
+    container_bin = Bin(
+        "Container1",
+        float(container_data['Width']),
+        float(container_data['Height']),
+        float(container_data['Depth']),
+        float(container_data['MaxWeight'])
+    )
     packer.add_bin(container_bin)
+    
+    # Sort bins by height in descending order
+    bins.sort(key=lambda x: x.height, reverse=True)
     
     # Add all bins to the packer
     for bin_item in bins:
@@ -41,7 +58,7 @@ def pack_bins(container):
     # Run the packing algorithm
     packer.pack(
         bigger_first=True,
-        distribute_items=True,
+        distribute_items=False,  # Don't spread items across container
         number_of_decimals=0
     )
     
@@ -52,9 +69,8 @@ def pack_bins(container):
     fitted_items = []
     unfitted_items = []
     
-    # Process fitted items
+    # Convert items to our format and get their initial positions
     for item in container_result.items:
-        # Create Item object with position from packing result
         fitted_item = Item(
             name=item.name,
             width=float(str(item.width)),
@@ -62,7 +78,6 @@ def pack_bins(container):
             depth=float(str(item.depth)),
             weight=float(str(item.weight))
         )
-        # Ensure all position values are float type by converting through string
         fitted_item.position = [
             float(str(item.position[0])), 
             float(str(item.position[1])), 
@@ -70,6 +85,36 @@ def pack_bins(container):
         ]
         fitted_item.rotation_type = item.rotation_type
         fitted_items.append(fitted_item)
+    
+    # Sort items by height position (bottom to top)
+    fitted_items.sort(key=lambda x: x.position[1])
+    
+    # Apply gravity to each item
+    for i, item in enumerate(fitted_items):
+        # Start at container floor
+        min_height = 0
+        
+        # Check all items below this one for collision
+        for other in fitted_items[:i]:
+            # Check if items overlap in X-Z plane (horizontal plane)
+            x_overlap = (
+                item.position[0] < other.position[0] + other.width and 
+                item.position[0] + item.width > other.position[0]
+            )
+            z_overlap = (
+                item.position[2] < other.position[2] + other.depth and 
+                item.position[2] + item.depth > other.position[2]
+            )
+            
+            # If there's overlap in X-Z plane, this item must rest on top of the other
+            if x_overlap and z_overlap:
+                min_height = max(min_height, other.position[1] + other.height)
+        
+        # Move item down to rest on highest surface below it
+        current_height = item.position[1]
+        if current_height > min_height:
+            # Only move down if item is floating
+            item.position[1] = min_height
     
     # Process unfitted items
     for item in container_result.unfitted_items:

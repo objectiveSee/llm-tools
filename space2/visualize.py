@@ -5,10 +5,11 @@ def create_box(width, height, depth, position):
     """Create a box mesh with given dimensions at the specified position"""
     # Create box using corner coordinates
     # Note: position is the front-bottom-left corner (x,y,z)
+    # Swap Y and Z since packing uses Y as up but visualization uses Z as up
     box = pv.Box(bounds=(
         position[0], position[0] + width,           # x bounds
-        position[1], position[1] + height,          # y bounds
-        position[2], position[2] + depth            # z bounds
+        position[2], position[2] + depth,           # y bounds (was z)
+        position[1], position[1] + height           # z bounds (was y) - height goes up
     ))
     
     return box
@@ -87,8 +88,9 @@ def visualize_packing(container, plotter=None):
             # Add to plot with different opacity to distinguish from fitted items
             plotter.add_mesh(box, color=colors.get(bin_type, 'tan'), opacity=0.4, style='wireframe')
     
-    # Set camera position for better initial view
+    # Set camera position to show Z axis as up (to match actual visualization)
     plotter.camera_position = 'iso'
+    # No need to modify elevation since Z is already up in PyVista's default view
     plotter.show_grid()
     
     return plotter
