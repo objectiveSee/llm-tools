@@ -1,5 +1,5 @@
 import csv
-from py3dbp import Packer, Item
+from py3dbp import Packer, Item, Bin
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,50 +23,87 @@ def load_bins():
     return bins
 
 def pack_bins(container):
-    """Pack bins into a simple row without container fitting"""
+    """Pack bins into the container using py3dbp Packer for optimal fitting"""
     # Load bins
     bins = load_bins()
     
-    # Group bins by type
-    bin_groups = {}
+    # Create packer instance
+    packer = Packer()
+    
+    # Create and add container from Container.tsv dimensions
+    container_bin = Bin("Container1", float(232), float(238), float(468), float(44000))
+    packer.add_bin(container_bin)
+    
+    # Add all bins to the packer
     for bin_item in bins:
-        bin_type = bin_item.name.split('_')[0]
-        if bin_type not in bin_groups:
-            bin_groups[bin_type] = []
-        bin_groups[bin_type].append(bin_item)
+        packer.add_item(Item(bin_item.name, bin_item.width, bin_item.height, bin_item.depth, bin_item.weight))
     
-    # Place bins in order: XL -> Large -> Medium -> Small
+    # Run the packing algorithm
+    packer.pack(
+        bigger_first=True,
+        distribute_items=True,
+        number_of_decimals=0
+    )
+    
+    # Get the container results
+    container_result = packer.bins[0]  # We only have one container
+    
+    # Update our container with fitted and unfitted items
     fitted_items = []
-    current_x = 0
-    spacing = 2  # Increased spacing between bins
+    unfitted_items = []
     
-    for bin_type in ['XL', 'Large', 'Medium', 'Small']:
-        if bin_type not in bin_groups:
-            continue
-            
-        # Add extra spacing between different bin types
-        if fitted_items:  # If we already placed some bins
-            current_x += spacing * 2  # Extra spacing between different types
-            
-        for bin_item in bin_groups[bin_type]:
-            bin_item.rotation_type = 0  # No rotation
-            bin_item.position = [float(current_x), 0.0, 0.0]  # Place at ground level
-            fitted_items.append(bin_item)
-            
-            # Move x position for next bin
-            current_x += bin_item.width + spacing  # Add spacing between bins
+    # Process fitted items
+    for item in container_result.items:
+        # Create Item object with position from packing result
+        fitted_item = Item(
+            name=item.name,
+            width=float(str(item.width)),
+            height=float(str(item.height)),
+            depth=float(str(item.depth)),
+            weight=float(str(item.weight))
+        )
+        # Ensure all position values are float type by converting through string
+        fitted_item.position = [
+            float(str(item.position[0])), 
+            float(str(item.position[1])), 
+            float(str(item.position[2]))
+        ]
+        fitted_item.rotation_type = item.rotation_type
+        fitted_items.append(fitted_item)
+    
+    # Process unfitted items
+    for item in container_result.unfitted_items:
+        unfitted_item = Item(
+            name=item.name,
+            width=float(str(item.width)),
+            height=float(str(item.height)),
+            depth=float(str(item.depth)),
+            weight=float(str(item.weight))
+        )
+        unfitted_items.append(unfitted_item)
     
     # Update container with results
     container.items = fitted_items
-    container.unfitted_items = []  # No unfitted items since we're not checking container bounds
+    container.unfitted_items = unfitted_items
     
-    logger.info(f'Placed {len(container.items)} bins in a row')
-    print(f"\nPlacement Results:")
-    print(f"Total bins placed: {len(container.items)}")
+    # Log results
+    logger.info(f'Packed {len(fitted_items)} bins into container')
+    logger.info(f'Unable to pack {len(unfitted_items)} bins')
     
-    # Print positions of bins
+    print(f"\nPacking Results:")
+    print(f"Successfully packed: {len(fitted_items)} bins")
+    print(f"Unable to pack: {len(unfitted_items)} bins")
+    
+    # Print positions of fitted bins
     print("\nBin positions:")
-    for item in container.items:
-        print(f"{item.name}: Position ({item.position[0]}, {item.position[1]}, {item.position[2]})")
+    for item in fitted_items:
+        print(f"{item.name}: Position ({item.position[0]}, {item.position[1]}, {item.position[2]}), "
+              f"Rotation {item.rotation_type}")
+    
+    # Print unfitted bins if any
+    if unfitted_items:
+        print("\nUnfitted bins:")
+        for item in unfitted_items:
+            print(f"{item.name}")
     
     return container

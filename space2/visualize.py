@@ -36,7 +36,8 @@ def visualize_packing(container, plotter=None):
         'Small': 'tan',
         'Medium': 'tan',
         'Large': 'tan',
-        'XL': 'tan'
+        'XL': 'tan',
+        'XXL': 'tan'
     }
     
     # Add each packed item
@@ -53,7 +54,7 @@ def visualize_packing(container, plotter=None):
         )
         
         # Add to plot with slight transparency and edges visible
-        plotter.add_mesh(box, color=colors[bin_type], opacity=0.7, show_edges=True)
+        plotter.add_mesh(box, color=colors.get(bin_type, 'tan'), opacity=0.7, show_edges=True)
     
     # Add unfitted items in a grid layout outside the container
     if hasattr(container, 'unfitted_items'):
@@ -84,7 +85,7 @@ def visualize_packing(container, plotter=None):
             )
             
             # Add to plot with different opacity to distinguish from fitted items
-            plotter.add_mesh(box, color=colors[bin_type], opacity=0.4, style='wireframe')
+            plotter.add_mesh(box, color=colors.get(bin_type, 'tan'), opacity=0.4, style='wireframe')
     
     # Set camera position for better initial view
     plotter.camera_position = 'iso'
