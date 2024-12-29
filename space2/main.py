@@ -1,50 +1,34 @@
-import logging
-import csv
-from py3dbp import Packer, Bin, Item
+from models.container import Container
+from services.packing_service import PackingService
+from services.visualization_service import VisualizationService
+from utils.logger import setup_logger
 
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
-
-# Create a logger
-logger = logging.getLogger(__name__)
-
-def load_container():
-    """Load container information from Container.tsv"""
-    with open('Container.tsv', 'r') as file:
-        reader = csv.DictReader(file, delimiter='\t')
-        container_data = next(reader)  # Get first row
-        logger.debug(f"Loading container: {container_data['ID']}")
-        return Bin(
-            name=container_data['ID'],
-            width=float(container_data['Width']),
-            height=float(container_data['Height']),
-            depth=float(container_data['Depth']),
-            max_weight=float(container_data['MaxWeight'])
-        )
+logger = setup_logger(__name__)
 
 def main():
-    logger.info('Loading container from Container.tsv')
-    container = load_container()
-    
-    logger.info(f'Loaded container:')
-    print(f"Container: {container.name}")
-    print(f"  Dimensions: {container.width} x {container.height} x {container.depth}")
-    print(f"  Max Weight: {container.max_weight}")
-    
-    # Pack bins into container
-    from packing import pack_bins
-    packed_container = pack_bins(container)
-    
-    # Show 3D visualization
-    from visualize import show_interactive_plot
-    show_interactive_plot(packed_container)
+    """Main entry point for the bin packing application."""
+    try:
+        # Create container from data
+        logger.info('Loading container from Container.tsv')
+        container = Container.from_data()
+        
+        # Log container details
+        logger.info(f'Loaded container:')
+        print(f"Container: {container.name}")
+        print(f"  Dimensions: {container.width} x {container.height} x {container.depth}")
+        print(f"  Max Weight: {container.max_weight}")
+        
+        # Pack bins into container
+        packing_service = PackingService()
+        packed_container = packing_service.pack_bins(container)
+        
+        # Show 3D visualization
+        visualization_service = VisualizationService()
+        visualization_service.show_interactive_plot(packed_container)
+        
+    except Exception as e:
+        logger.error(f"Error in main: {e}")
+        raise
 
 if __name__ == '__main__':
     main()
