@@ -61,7 +61,7 @@ class Container:
         Calculate the total volume of the container.
         
         Returns:
-            float: Container volume in cubic units
+            float: Container volume in cubic feet
         """
         return self.width * self.height * self.depth
 
@@ -70,7 +70,7 @@ class Container:
         Calculate the total volume of all packed bins.
         
         Returns:
-            float: Total volume of packed bins in cubic units
+            float: Total volume of packed bins in cubic feet
         """
         return sum(item.get_volume() for item in self.items)
 
@@ -79,7 +79,7 @@ class Container:
         Calculate the total volume of all unpacked bins.
         
         Returns:
-            float: Total volume of unpacked bins in cubic units
+            float: Total volume of unpacked bins in cubic feet
         """
         return sum(item.get_volume() for item in self.unfitted_items)
 
@@ -110,9 +110,9 @@ class Container:
             f"Successfully packed: {len(self.items)} bins",
             f"Unable to pack: {len(self.unfitted_items)} bins",
             f"\nVolume Analysis:",
-            f"Container Volume: {self.get_volume():.2f} cubic units",
-            f"Packed Volume: {self.get_packed_volume():.2f} cubic units",
-            f"Unpacked Volume: {self.get_unpacked_volume():.2f} cubic units",
+            f"Container Volume: {self.get_volume() / 1728:.2f} ft³",
+            f"Packed Volume: {self.get_packed_volume() / 1728:.2f} ft³",
+            f"Unpacked Volume: {self.get_unpacked_volume() / 1728:.2f} ft³",
             f"Volume Utilization: {self.get_volume_utilization():.1f}%"
         ]
         
