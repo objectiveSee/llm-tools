@@ -1,6 +1,5 @@
 Type	Width	Height	Depth	Weight	Quantity	Color
-Small	12	12	18	50	10	bisque
-Medium	18	18	24	100	10	tan
-Large	24	24	36	150	2	peru
-XL	36	36	48	200	1	sienna
-XXL	42	42	54	250	1	saddlebrown
+Large	24	16	19	150	10	peru
+Medium	18	18	24	100	6	tan
+Small	17	11	13	50	3	bisque
+Amazon-Small	16	12	7	50	1	bisque
